@@ -1,13 +1,16 @@
 <mat-toolbar>
-  <a mat-icon-button (click)="navigateBack()"><mat-icon>arrow_back</mat-icon></a>
+  <a mat-icon-button (click)="navigateBack()">
+    <mat-icon>arrow_back</mat-icon>
+  </a>
 </mat-toolbar>
 
 <div class="space-container">
   <mat-toolbar class="primary-color font-size-1">
-    <span i18n>{{headingStart ? headingStart + ' ' : ''}}Course Progress</span>
+    <ng-container *ngIf="selectedStep === undefined" i18n>My Course Progress</ng-container>
   </mat-toolbar>
   <div class="view-container view-full-height">
-    <planet-courses-progress-chart *ngIf="chartData?.length; else noProgress" [inputs]="chartData" [height]="yAxisLength" [showTotals]="false" (changeData)="changeData($event)">
+    <planet-courses-progress-chart *ngIf="chartData?.length; else noProgress" [inputs]="chartData"
+      [height]="yAxisLength" [showTotals]="false" (changeData)="changeData($event)">
     </planet-courses-progress-chart>
     <ng-template #noProgress i18n>No Progress record available</ng-template>
   </div>
