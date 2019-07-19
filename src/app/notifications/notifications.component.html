@@ -1,38 +1,59 @@
+<mat-toolbar>
+  <button mat-icon-button (click)="goBack()">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <span i18n>Todo List</span>
+  <span class="toolbar-fill"></span>
+  <button class="margin-lr-8" mat-stroked-button i18n>Show Completed</button>
+  <mat-icon>search</mat-icon>
+  <mat-form-field class="font-size-1">
+    <input matInput i18n-placeholder placeholder="Type to search...">
+  </mat-form-field>
+</mat-toolbar>
+
 <div class="space-container">
-  <mat-toolbar class="primary-color font-size-1">
-    <span i18n>Your Notifications</span>
-    <button mat-stroked-button (click)="readAllNotification()" i18n class="margin-lr">Mark all as Read</button>
-    <span class="toolbar-fill"></span>
-    <mat-form-field class="font-size-1 margin-lr-3">
-      <mat-select placeholder="Notification Status" value="all" (selectionChange)="onFilterChange($event.value)">
-        <mat-option *ngFor="let option of notificationStatus" value={{option.toLowerCase()}}>{{option}}</mat-option>
-      </mat-select>
-    </mat-form-field>
-  </mat-toolbar>
-  <ng-container *ngIf="!emptyData; else notFoundMessage">
-    <mat-table #table [dataSource]="notifications">
-      <ng-container matColumnDef="message">
-        <mat-cell *matCellDef="let element" (click)="readNotification(element)">
-          <p [ngClass]="{'primary-text-color':element.status==='unread'}">
-            <a [routerLink]="element.link ? [ element.link, element.linkParams || {} ] : '/notifications'">
-              <span [innerHTML]="element.message"></span>
-              <span *ngIf="element.time > 0" class="mat-caption margin-lr-8">{{element.time | date: 'mediumDate'}}</span>
-            </a>
-          </p>
-        </mat-cell>
-      </ng-container>
-      <ng-container matColumnDef="read">
-        <mat-cell *matCellDef="let element" >
-          <button mat-stroked-button *ngIf="element.status==='unread'" (click)="readNotification(element)" i18n>Mark as Read</button>
-        </mat-cell>
-      </ng-container>
-      <mat-row *matRowDef="let row; columns: displayedColumns;" ></mat-row>
-    </mat-table>
-    <mat-paginator #paginator
-      [pageSize]="50"
-      [pageSizeOptions]="[5, 10, 20, 50, 100, 200]">
-    </mat-paginator>
-  </ng-container>
+  <div class="view-container view-full-height view-table" >
+    <!-- <mat-toolbar class="primary-color font-size-1">
+      <span i18n>Your Notifications</span>
+      <button mat-stroked-button (click)="readAllNotification()" i18n class="margin-lr">Mark all as Read</button>
+      <span class="toolbar-fill"></span>
+      <mat-form-field class="font-size-1 margin-lr-3">
+        <mat-select placeholder="Notification Status" value="all" (selectionChange)="onFilterChange($event.value)">
+          <mat-option *ngFor="let option of notificationStatus" value={{option.toLowerCase()}}>{{option}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </mat-toolbar> -->
+    <ng-container *ngIf="!emptyData; else notFoundMessage">
+      <mat-selection-list>
+        <mat-list-option *ngFor="let todo of todos" [checkboxPosition]="'before'">
+          <h4 mat-line [innerHTML]="todo.message"></h4>
+          <p mat-line *ngIf="todo.time > 0" class="mat-caption margin-lr-8">{{todo.time | date: 'mediumDate'}}</p>
+        </mat-list-option>
+      </mat-selection-list>
+      <!-- <mat-table #table [dataSource]="notifications">
+        <ng-container matColumnDef="message">
+          <mat-cell *matCellDef="let element" (click)="readNotification(element)">
+            <p [ngClass]="{'primary-text-color':element.status==='unread'}">
+              <a [routerLink]="element.link ? [ element.link, element.linkParams || {} ] : '/notifications'">
+                <span [innerHTML]="element.message"></span>
+                <span *ngIf="element.time > 0" class="mat-caption margin-lr-8">{{element.time | date: 'mediumDate'}}</span>
+              </a>
+            </p>
+          </mat-cell>
+        </ng-container>
+        <ng-container matColumnDef="read">
+          <mat-cell *matCellDef="let element" >
+            <button mat-stroked-button *ngIf="element.status==='unread'" (click)="readNotification(element)" i18n>Mark as Read</button>
+          </mat-cell>
+        </ng-container>
+        <mat-row *matRowDef="let row; columns: displayedColumns;" ></mat-row>
+      </mat-table>
+      <mat-paginator #paginator
+        [pageSize]="50"
+        [pageSizeOptions]="[5, 10, 20, 50, 100, 200]">
+      </mat-paginator> -->
+    </ng-container>
+  </div>
   <ng-template #notFoundMessage>
     <div class="view-container">No Notification Found</div>
   </ng-template>
