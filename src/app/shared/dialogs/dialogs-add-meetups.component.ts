@@ -22,7 +22,7 @@ export class DialogsAddMeetupsComponent {
     private dialogsLoadingService: DialogsLoadingService
   ) {
     this.link = this.data.link;
-    this.view = this.data.view;
+    this.view = this.data.view || 'add';
     this.meetup = this.data.meetup;
   }
 
