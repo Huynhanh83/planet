@@ -262,19 +262,34 @@ export class UsersComponent implements OnInit, OnDestroy, AfterViewInit {
     };
   }
 
-  setRoles(user, roles, event) {
+  setRoles(user, roles, event, wasSuperAdmin = false) {
+    const makeSuperAdmin = roles.indexOf('_admin') > -1;
+    const planetConfig = this.stateService.configuration;
     const tempUser = {
       ...user,
-      roles,
+      roles: roles.filter(r => r !== '_admin'),
       oldRoles: [ ...user.roles ] || [ 'learner' ],
-      isUserAdmin: roles.indexOf('manager') > -1
+      isUserAdmin: roles.indexOf('manager') > -1 || makeSuperAdmin
     };
-    this.couchService.put('_users/org.couchdb.user:' + tempUser.name, tempUser).pipe(switchMap((response) => {
-      if (tempUser.isUserAdmin) {
-        return this.removeFromTabletUsers(tempUser);
-      }
-      return of({ });
-    })).subscribe((response) => {
+    const obs = [ this.couchService.put('_users/org.couchdb.user:' + tempUser.name, tempUser) ];
+    if (wasSuperAdmin) {
+      obs.push(this.couchService.delete('_node/nonode@nohost/_config/admins/' + tempUser.name));
+    }
+    if (makeSuperAdmin) {
+      obs.push(this.couchService.put(
+        '_node/nonode@nohost/_config/admins/' + tempUser.name,
+        '-' + tempUser.password_scheme + '-' + tempUser.derived_key + ',' + tempUser.salt + ',' + tempUser.iterations
+      ));
+      const adminName = tempUser.name + '@' + planetConfig.parentCode;
+      const userDetail = { ...user, requestId: planetConfig._id, isUserAdmin: false, roles: [], name: adminName };
+      obs.push(this.couchService.updateDocument('_users', { '_id': 'org.couchdb.user:' + adminName, ...userDetail }, {
+        domain: planetConfig.parentDomain
+      }));
+    }
+    if (tempUser.isUserAdmin) {
+      obs.push(this.removeFromTabletUsers(tempUser));
+    }
+    forkJoin(obs).subscribe(() => {
       console.log('Success!');
       this.initializeData();
     }, (error) => {
