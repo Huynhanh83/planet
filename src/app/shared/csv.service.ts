@@ -29,4 +29,28 @@ export class CsvService {
     ));
     this.generate(formattedData, options);
   }
+
+  exportSummaryCSV(charts: any[], planetName: string) {
+    const options = {
+      title: `Summary report for ${planetName}`,
+      filename: `Report of ${planetName} on ${new Date().toDateString()}`,
+      showTitle: true,
+      showLabels: false,
+      useKeysAsHeaders: false
+    };
+    const chartLabels = (chart, header: boolean) => chart.data.datasets[0].data.reduce(
+      (csvObj, { x: label }) => ({ ...csvObj, [label]: header ? label : '' }),
+      {}
+    );
+    const formattedData = charts.reduce((exportData, chart) => {
+      return [ ...exportData, { label: chart.config.options.title.text, ...chartLabels(chart, true) }, chart.data.datasets.map(dataset =>
+        ({
+          label: dataset.label,
+          ...dataset.data.reduce((csvObj, { x: label, y: number }) => ({ ...csvObj, [label]: number }), {})
+        })
+      ), { label: '', ...chartLabels(chart, false) } ];
+    }, []).flat();
+    this.generate(formattedData, options);
+  }
+
 }

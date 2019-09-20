@@ -205,10 +205,15 @@ export class ReportsDetailComponent implements OnInit, OnDestroy {
     return { planetCode: this.planetCode, filterAdmin: true, ...(this.filter ? { fromMyPlanet: this.filter === 'myplanet' } : {}) };
   }
 
-  exportCSV(reportType: 'logins' | 'resourceViews') {
+  exportCSV(reportType: 'logins' | 'resourceViews' ) {
     this.csvService.exportCSV(reportType === 'logins' ?
       { data: this.loginActivities, title: 'Member Visits' } :
       { data: this.resourceActivities, title: 'Resource Views' }
     );
   }
+
+  exportSummaryCSV() {
+    this.csvService.exportSummaryCSV(this.charts, this.planetName);
+  }
+
 }
