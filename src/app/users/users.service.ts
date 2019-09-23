@@ -3,6 +3,7 @@ import { forkJoin } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { CouchService } from '../shared/couchdb.service';
 import { StateService } from '../shared/state.service';
+import { SyncService } from '../shared/sync.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,8 @@ export class UsersService {
 
   constructor(
     private couchService: CouchService,
-    private stateService: StateService
+    private stateService: StateService,
+    private syncService: SyncService
   ) {}
 
   demoteFromAdmin(user) {
@@ -39,14 +41,17 @@ export class UsersService {
       ...user,
       requestId: planetConfig._id,
       isUserAdmin: false,
-      roles: [],
+      roles: ['learner'],
       name: adminName,
       sync: true,
       _attachments: undefined,
       _rev: undefined
     };
     return forkJoin([
-      this.couchService.updateDocument('_users', { ...parentUser, '_id': adminId }, { domain: planetConfig.parentDomain }),
+      this.couchService.updateDocument('_users', { ...parentUser, '_id': adminId }),
+      this.syncService.confirmPasswordAndRunReplicators([
+        { db: '_users', selector: { '_id': adminId }, type: 'push' }
+      ]),
       this.couchService.put(
         `_node/nonode@nohost/_config/admins/${user.name}`,
         `-${user.password_scheme}-${user.derived_key},${user.salt},${user.iterations}`
